@@ -1,5 +1,7 @@
 # Natural Policy Gradient vs. TRPO: a battle of gradients
+
 ### authors: Jonathan Mitnik, Guido Visser, Lucas Fijen, Pieter de Marez Oyens
+
 ## Introduction
 
 ## Methods
