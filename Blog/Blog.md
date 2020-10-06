@@ -1,5 +1,5 @@
 # Catchy Title
-
+Authors: Pieter Oyens de Marez nogwat , Lucas Fijen, Jonathan Mitnik, Guido Visser
 ## Introduction
 
 ## Methods
