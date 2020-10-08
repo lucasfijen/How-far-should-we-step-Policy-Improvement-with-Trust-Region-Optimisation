@@ -3,7 +3,6 @@
 # If you want to test/submit your solution **restart the kernel, run all cells and submit the pg_autograde.py file into codegrade.**
 
 #%%
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -161,7 +160,6 @@ def sample_episode(env, policy):
         if done:
             break
 
-
     return torch.tensor(states), torch.tensor(actions).view(-1,1), torch.tensor(rewards).view(-1,1), torch.tensor(dones).view(-1,1)
 
 #%% 
@@ -208,7 +206,10 @@ def compute_reinforce_loss(policy, episode, discount_factor):
     return loss
 
 
-def run_episodes_policy_gradient(policy, env, num_episodes, discount_factor, learn_rate, 
+def run_episodes_policy_gradient(
+    policy, 
+    env, 
+    num_episodes, discount_factor, learn_rate, 
                                  sampling_function=sample_episode):
     optimizer = optim.Adam(policy.parameters(), learn_rate)
     
