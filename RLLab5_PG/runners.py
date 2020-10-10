@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Union
 
 from policies import NNPolicy
 import gym
@@ -27,7 +27,7 @@ class Runner:
     # TODO: can these follow some type
     def default_runner_fn(
         self,
-        optimizer: optim.Optimizer,
+        optimizer: Union[optim.Optimizer, Callable],
         policy: NNPolicy,
         env: gym.Env,
         num_episodes: int, 
@@ -38,14 +38,15 @@ class Runner:
         episode_durations = []
 
         for i in range(num_episodes):
-
             with torch.no_grad():
                 episode = sampling_function(env, policy)
 
             loss = loss_fn(policy, episode, discount_factor)
-            optimizer.zero_grad()
             loss.backward()
-            optimizer.step()
+
+            if (isintance(optimizer, optim.Optimizer)):
+                optimizer.step()
+                optimizer.zero_grad()
                            
             if i % 10 == 0:
                 print("{2} Episode {0} finished after {1} steps"

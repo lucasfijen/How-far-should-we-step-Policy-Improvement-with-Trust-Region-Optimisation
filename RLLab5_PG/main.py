@@ -19,6 +19,7 @@ from losses import compute_reinforce_loss
 from policies import NNPolicy
 from sampling import sample_episode
 
+# TQDM wrapper
 def tqdm(*args, **kwargs):
     return _tqdm(*args, **kwargs, mininterval=1)  # Safety, do not overflow buffer
 
