@@ -2,7 +2,6 @@
 # All dependencies
 from torch.optim import optimizer
 from runners import Runner
-from sampling import sample_episode
 import numpy as np
 import torch
 import torch.nn as nn
@@ -18,7 +17,7 @@ import time
 import plots
 from losses import compute_reinforce_loss
 from policies import NNPolicy
-from sampling import sample_episode
+from sampling import sample_mc_episode
 
 # TQDM wrapper
 def tqdm(*args, **kwargs):
@@ -42,7 +41,7 @@ runner.run(
     optimizer=optimizer, 
     num_episodes=nr_eps, 
     discount_factor=discount_rate, 
-    sampling_function=sample_episode, 
+    sampling_function=sample_mc_episode, 
     loss_fn=compute_reinforce_loss
 )
 

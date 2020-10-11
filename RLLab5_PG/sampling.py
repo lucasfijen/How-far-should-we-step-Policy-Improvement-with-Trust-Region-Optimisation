@@ -1,6 +1,6 @@
 import torch
 
-def sample_episode(env, policy):
+def sample_mc_episode(env, policy):
     """
     A sampling routine. Given environment and a policy samples one episode and returns states, actions, rewards
     and dones from environment's step function as tensors.
