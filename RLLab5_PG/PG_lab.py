@@ -209,8 +209,11 @@ def compute_reinforce_loss(policy, episode, discount_factor):
 def run_episodes_policy_gradient(
     policy, 
     env, 
-    num_episodes, discount_factor, learn_rate, 
-                                 sampling_function=sample_episode):
+    num_episodes, 
+    discount_factor, 
+    learn_rate, 
+    sampling_function=sample_episode
+):
     optimizer = optim.Adam(policy.parameters(), learn_rate)
     
     episode_durations = []

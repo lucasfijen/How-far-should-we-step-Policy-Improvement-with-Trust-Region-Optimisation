@@ -9,6 +9,7 @@ class Runner:
     def __init__(self, env: gym.Env, policy: NNPolicy) -> None:
         self.env = env
         self.policy = policy
+        self.episode_durations = []
 
     def run(
         self,
@@ -17,40 +18,31 @@ class Runner:
         discount_factor, 
         sampling_function, 
         loss_fn,
-        runner_fn: Callable = None
     ):
-        runner_fn = self.default_runner_fn if runner_fn is None else runner_fn
+        """Perform a run, and store latest results in `self.episode_durations`"""
 
-        runner_fn(optimizer, self.policy, self.env, num_episodes, discount_factor, sampling_function, loss_fn)
-
-
-    # TODO: can these follow some type
-    def default_runner_fn(
-        self,
-        optimizer: Union[optim.Optimizer, Callable],
-        policy: NNPolicy,
-        env: gym.Env,
-        num_episodes: int, 
-        discount_factor: float, 
-        sampling_function: Callable, 
-        loss_fn: Callable
-    ):
         episode_durations = []
 
         for i in range(num_episodes):
+            # Clean up old gradients first
+            optimizer.zero_grad()
+
+            # First sample the entire episode
             with torch.no_grad():
-                episode = sampling_function(env, policy)
-
-            loss = loss_fn(policy, episode, discount_factor)
+                episode = sampling_function(self.env, self.policy)
+            
+            # Calculate the entire loss, and store gradients of parameters
+            loss = loss_fn(self.policy, episode, discount_factor)
             loss.backward()
-
-            if (isintance(optimizer, optim.Optimizer)):
-                optimizer.step()
-                optimizer.zero_grad()
-                           
+            
+            # Use gradients of parameters to improve
+            optimizer.step()
+            
+            # Every 10 iterations, print results
             if i % 10 == 0:
-                print("{2} Episode {0} finished after {1} steps"
-                    .format(i, len(episode[0]), '\033[92m' if len(episode[0]) >= 195 else '\033[99m'))
+                print("{2} Episode {0} finished after {1} steps".format(i, len(episode[0]), '\033[92m' if len(episode[0]) >= 195 else '\033[99m'))
+
             episode_durations.append(len(episode[0]))
         
+        self.episode_durations = episode_durations
         return episode_durations

@@ -15,6 +15,7 @@ import gym
 import time
 
 # Local dependencies
+import plots
 from losses import compute_reinforce_loss
 from policies import NNPolicy
 from sampling import sample_episode
@@ -23,7 +24,6 @@ from sampling import sample_episode
 def tqdm(*args, **kwargs):
     return _tqdm(*args, **kwargs, mininterval=1)  # Safety, do not overflow buffer
 
-# %%
 # Define a policy and environment
 policy = NNPolicy()
 env = gym.envs.make("CartPole-v1")
@@ -35,14 +35,15 @@ optimizer = optim.Adam(policy.parameters())
 runner = Runner(env, policy)
 
 # %%
-# TODO: Put these in variables
 nr_eps = 500
 discount_rate = 1.0
 
 runner.run(
-    optimizer, 
-    nr_eps, 
-    discount_rate, 
-    sample_episode, 
-    compute_reinforce_loss
+    optimizer=optimizer, 
+    num_episodes=nr_eps, 
+    discount_factor=discount_rate, 
+    sampling_function=sample_episode, 
+    loss_fn=compute_reinforce_loss
 )
+
+plots.plot_durations(runner.episode_durations)
