@@ -44,10 +44,10 @@ def linesearch(policy_net,
         actual_improve = fval - newfval
         expected_improve = expected_improve_rate * stepfrac
         ratio = actual_improve / expected_improve
-        # print("a/e/r", actual_improve.item(), expected_improve.item(), ratio.item())
+        print("a/e/r", actual_improve.item(), expected_improve.item(), ratio.item())
 
         if ratio.item() > accept_ratio and actual_improve.item() > 0:
-            # print("fval after", newfval.item())
+            print("fval after", newfval.item())
             return True, xnew
     return False, x
 
@@ -91,6 +91,8 @@ def update_policy(args,
                 u_cov,
                 torch.matmul(torch.diag(new_s_cov),
                              torch.matmul(v_cov, loss_grad)))
+        
+        
         policy_optimizer.zero_grad()
         set_flat_grad_to(policy_net, loss_grad)
         policy_optimizer.step()

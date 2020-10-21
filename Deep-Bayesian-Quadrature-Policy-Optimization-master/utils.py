@@ -38,7 +38,7 @@ def set_flat_grad_to(model, flat_params):
     for param in model.parameters():
         flat_size = int(np.prod(list(param.size())))
         param.grad = flat_params[prev_ind:prev_ind + flat_size].view(
-            param.size())
+            param.size()).clone()
         prev_ind += flat_size
 
 

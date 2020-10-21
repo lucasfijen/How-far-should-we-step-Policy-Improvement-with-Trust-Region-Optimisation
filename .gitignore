@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.vscode/launch.json
+Deep-Bayesian-Quadrature-Policy-Optimization-master/.vscode/launch.json
+Deep-Bayesian-Quadrature-Policy-Optimization-master/.vscode/settings.json
