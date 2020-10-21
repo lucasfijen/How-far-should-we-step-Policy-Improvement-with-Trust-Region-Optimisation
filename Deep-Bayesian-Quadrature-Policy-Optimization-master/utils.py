@@ -1,6 +1,11 @@
 import math
 import numpy as np
 import torch
+import os
+
+def ensure_path(path_to_file):
+    os.makedirs(os.path.dirname(path_to_file), exist_ok=True)
+
 
 def viz_compgraph(tensor: torch.Tensor, filename: str='vis-tensor'):
     """Visualizes and saves a computational graph using `torchviz`"""

@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 import argparse
@@ -11,6 +12,10 @@ def get_args():
     )
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
     # General arguments
+    parser.add_argument('--label',
+                        default=f"run-{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}",
+                        metavar='G',
+                        help='Label of the experiment to run')
     parser.add_argument('--env-name',
                         default="Swimmer-v2",
                         metavar='G',
@@ -25,6 +30,16 @@ def get_args():
                         default=15000,
                         metavar='N',
                         help='state-action sample size (default: 15000)')
+    parser.add_argument('--nr-epochs',
+                        type=int,
+                        default=1001,
+                        metavar='N',
+                        help='nr epochs')
+    parser.add_argument('--use-case',
+                        type=bool,
+                        default=False,
+                        metavar='cuda',
+                        help='Use cuda (if available) or not?')
     parser.add_argument('--pg_algorithm',
                         default="VanillaPG",
                         help=
@@ -33,7 +48,7 @@ def get_args():
                         action='store_true',
                         help='renders the policy roll-out in the environment')
     parser.add_argument('--output_directory',
-                        default="session_logs/",
+                        default="results",
                         metavar='G',
                         help='writes the session logs to this directory')
     parser.add_argument('--gpu_id',
