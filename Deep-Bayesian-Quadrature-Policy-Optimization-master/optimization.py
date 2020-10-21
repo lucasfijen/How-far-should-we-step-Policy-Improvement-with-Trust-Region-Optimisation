@@ -13,6 +13,7 @@ def conjugate_gradients(Avp, b, nsteps, residual_tol=1e-10, device="cpu"):
     r = b.clone()
     p = b.clone()
     rdotr = torch.dot(r, r)
+    
     for i in range(nsteps):
         _Avp = Avp(p)
         beta = rdotr / torch.dot(p, _Avp)
@@ -115,9 +116,12 @@ def update_policy(args,
                              torch.matmul(v_cov, neg_stepdir)))
 
         if args.pg_algorithm == "NPG":  # NPG update
+            old_params = get_flat_params_from(policy_net)
             policy_optimizer.zero_grad()
             set_flat_grad_to(policy_net, neg_stepdir)
             policy_optimizer.step()
+            new_params = get_flat_params_from(policy_net)
+            print("step size?: ", torch.dist(old_params, new_params))
         else:  # TRPO update
             stepdir = -neg_stepdir  # Search direction after solving the constrained optimization problem, same as natural gradient
             shs = 0.5 * (stepdir * Fvp(stepdir)).sum(0, keepdim=True)
@@ -134,6 +138,8 @@ def update_policy(args,
 
 def update_params(args, batch, policy_net, value_net, policy_optimizer,
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer):
+    # states: batch-size x state-space
+    # states: batch-size x 
     states = Variable(torch.Tensor(batch.state)).to(args.device)
     actions = torch.Tensor(np.concatenate(batch.action, 0)).to(args.device)
     action_means, action_log_stds, action_stds = policy_net(states)

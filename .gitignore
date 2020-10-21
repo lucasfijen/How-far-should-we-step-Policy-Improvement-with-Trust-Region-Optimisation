@@ -3,6 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.DS_Store
+
+# temp
+.vscode
+session_logs
+results
+
 # C extensions
 *.so
 

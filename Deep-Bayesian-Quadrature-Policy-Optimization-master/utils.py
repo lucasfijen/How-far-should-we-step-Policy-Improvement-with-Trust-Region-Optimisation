@@ -2,6 +2,13 @@ import math
 import numpy as np
 import torch
 
+def viz_compgraph(tensor: torch.Tensor, filename: str='vis-tensor'):
+    """Visualizes and saves a computational graph using `torchviz`"""
+    try:
+        import torchviz
+        torchviz.make_dot(tensor).render(f'results/filename/{filename}')
+    except:
+        print('You probably dont have torchviz installed, unable to print visualization of tensor')
 
 def normal_entropy(std):
     var = std.pow(2)
@@ -38,7 +45,7 @@ def set_flat_grad_to(model, flat_params):
     for param in model.parameters():
         flat_size = int(np.prod(list(param.size())))
         param.grad = flat_params[prev_ind:prev_ind + flat_size].view(
-            param.size())
+            param.size()).clone()
         prev_ind += flat_size
 
 
