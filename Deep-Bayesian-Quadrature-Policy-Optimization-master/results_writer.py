@@ -14,6 +14,7 @@ class ResultsRow(NamedTuple):
     timestamp: str
     iteration: int
     step_size: float
+    iteration_duration: float
     nr_steps: int
     velocity: float
     perf: float    
@@ -34,7 +35,8 @@ class ResultsWriter:
             'run_nr_rollouts',
             'run_model', 
             'timestamp', 
-            'iteration', 
+            'iteration',
+            'iteration_duration',
             'step_size', 
             'nr_steps', 
             'velocity', 
@@ -44,7 +46,7 @@ class ResultsWriter:
 
     def add(self, results: ResultsRow):
         self.results = self.results.append(results)
-        self.results.to_csv(self.path)
+        self.results.to_csv(self.path/'results.csv', mode='a')
 
         self.tensorboard_writer.add_scalar("Average reward", results.perf, results.step_size)
         

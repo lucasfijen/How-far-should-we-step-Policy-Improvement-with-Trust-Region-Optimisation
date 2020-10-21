@@ -1,6 +1,5 @@
 from datetime import date, datetime
 import gym
-from args import args
 import torch
 import gpytorch
 from models import *
@@ -124,6 +123,7 @@ for iteration in range(1, args.nr_epochs):
           format(iteration, mean_episode_reward,
                  (dt.datetime.now() - start_time).seconds))
     start_time = dt.datetime.now()
+
     results_writer.add(results=ResultsRow(
         run_label=args.run_label,
         run_nr_epochs=args.nr_epochs,
@@ -136,5 +136,3 @@ for iteration in range(1, args.nr_epochs):
         run_nr_rollouts=num_episodes,
         step_size=0,
     ))
-    
-    summa_writer.add_scalar("Average reward", mean_episode_reward, STEPS)
