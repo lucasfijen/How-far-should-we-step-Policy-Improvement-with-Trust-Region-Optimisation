@@ -11,7 +11,7 @@ class ResultsWriterOptions(NamedTuple):
 
 class ResultsRow(NamedTuple):
     env: str
-    seed: int | float
+    seed: int
     run_label: str
     run_nr_epochs: str
     nr_episodes: str
