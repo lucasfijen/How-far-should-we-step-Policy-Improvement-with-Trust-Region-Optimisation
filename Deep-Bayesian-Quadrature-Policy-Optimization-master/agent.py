@@ -13,6 +13,7 @@ import datetime as dt
 from arguments import get_args
 import fast_svd
 from results_writer import ResultsRow, ResultsWriter
+from tqdm import tqdm
 
 args = get_args()
 
@@ -86,7 +87,11 @@ if args.advantage_flag:
 running_state = ZFilter((num_inputs, ), clip=5)
 start_time = dt.datetime.now()
 STEPS = 0
-for iteration in range(1, args.nr_epochs):
+
+episodetqdm = tqdm(range(1, args.nr_epochs+1), desc='iteration', unit=' iteration')
+scoretqdm = tqdm(total=0, desc='reward', unit=' reward')
+
+for iteration in episodetqdm:
     memory = Memory()
     num_steps = 0
     batch_reward = 0
@@ -125,9 +130,13 @@ for iteration in range(1, args.nr_epochs):
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer)
     STEPS += 1
 
-    print('Iteration {:4d} - Average reward {:.3f} - Time elapsed: {:3d}sec'.
-          format(iteration, mean_episode_reward,
-                 (dt.datetime.now() - start_time).seconds))
+    roundreward = float('{:.3f}'.format(mean_episode_reward))
+    if roundreward > scoretqdm.total:
+        scoretqdm.total = roundreward
+    scoretqdm.update(roundreward - scoretqdm.n)
+    # print('Iteration {:4d} - Average reward {:.3f} - Time elapsed: {:3d}sec'.
+    #       format(iteration, mean_episode_reward,
+    #              (dt.datetime.now() - start_time).seconds))
 
     results_writer.add(results=ResultsRow(
         # All `run_` properties remain the same across savings of a run

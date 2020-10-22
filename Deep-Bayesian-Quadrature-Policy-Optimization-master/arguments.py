@@ -83,7 +83,7 @@ def get_args():
                         type=float,
                         default=7e-4,
                         metavar='G',
-                        help='learning rate (default: 1e-1)')
+                        help='learning rate (default: 7e-4)')
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
     # TRPO arguments
     parser.add_argument('--max-kl',
