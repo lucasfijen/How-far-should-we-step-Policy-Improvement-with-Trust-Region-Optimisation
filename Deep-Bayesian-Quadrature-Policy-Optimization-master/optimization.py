@@ -123,19 +123,17 @@ def update_policy(args,
             set_flat_grad_to(policy_net, neg_stepdir)
             policy_optimizer.step()
             new_params = get_flat_params_from(policy_net)
-            print("step size?: ", torch.dist(old_params, new_params))
         else:  # TRPO update
             stepdir = -neg_stepdir  # Search direction after solving the constrained optimization problem, same as natural gradient
             shs = 0.5 * (stepdir * Fvp(stepdir)).sum(0, keepdim=True) ## Important, here is the TRPO magic
             lm = torch.sqrt(shs / args.max_kl)  # One over largest step size/ trust region size
             beta = torch.sqrt(args.max_kl/shs)
-            print(1/lm)
-
             step_size = 1 / lm
-            print(beta)
             fullstep = stepdir / lm[
                 0]  # Naive trust region based update corresponding to the largest step size
+            # print(fullstep)
             neggdotstepdir = (stepdir * Fvp(stepdir)).sum(0, keepdim=True)
+            # print(neggdotstepdir)
             prev_params = get_flat_params_from(policy_net)
             # Line search avoids large policy steps that result in catastrophic performance degradation.
             success, new_params = linesearch(policy_net, get_loss, prev_params,
