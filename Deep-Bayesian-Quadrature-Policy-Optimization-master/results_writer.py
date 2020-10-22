@@ -10,7 +10,7 @@ class ResultsWriterOptions(NamedTuple):
 class ResultsRow(NamedTuple):
     run_label: str
     run_nr_epochs: str
-    run_nr_rollouts: str
+    nr_episodes: str
     run_model: str
     timestamp: str
     epoch: int
@@ -35,7 +35,7 @@ class ResultsWriter:
         self.columns = [
             'run_label',
             'run_nr_epochs',
-            'run_nr_rollouts',
+            'nr_episodes',
             'run_model', 
             'timestamp', 
             'epoch',

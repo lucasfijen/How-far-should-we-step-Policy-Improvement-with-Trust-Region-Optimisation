@@ -35,6 +35,11 @@ def get_args():
                         default=1001,
                         metavar='N',
                         help='nr epochs')
+    parser.add_argument('--max-episode-steps',
+                        type=int,
+                        default=10000,
+                        metavar='N',
+                        help='max episode steps')
     parser.add_argument('--use-case',
                         type=bool,
                         default=False,
