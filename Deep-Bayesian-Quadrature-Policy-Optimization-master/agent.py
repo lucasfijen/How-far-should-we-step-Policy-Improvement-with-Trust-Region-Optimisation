@@ -1,3 +1,5 @@
+from datetime import date, datetime
+import platform
 import gym
 import torch
 import gpytorch
@@ -10,8 +12,10 @@ from utils import *
 import datetime as dt
 from arguments import get_args
 import fast_svd
+from results_writer import ResultsRow, ResultsWriter
 
-args, summa_writer = get_args()
+args = get_args()
+
 torch.utils.backcompat.broadcast_warning.enabled = True
 torch.utils.backcompat.keepdim_warning.enabled = True
 torch.set_default_tensor_type('torch.DoubleTensor')
@@ -26,10 +30,14 @@ num_inputs = env.observation_space.shape[0]
 num_actions = env.action_space.shape[0]
 print(' State Dimensions :- ', num_inputs)
 print(' Action Dimensions :- ', num_actions)
+print(args.output_directory)
+
+results_writer = ResultsWriter(args.run_label,f'{args.output_directory}', pg_model=args.pg_algorithm)
 args.device = torch.device("cuda" if args.pg_estimator == "BQ" else "cpu")
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Instantiating the policy and value function neural networks, GP's MLL objective function and their respective optimizers
-print('Policy Optimization Framework :- ', args.pg_algorithm)
+print('Going to run for the following PG algorithms :- ', args.pg_algorithm)
 print('Policy Gradient Estimator :- ' +
       (('UAPG' if args.UAPG_flag else 'DBQPG'
         ) if args.pg_estimator == "BQ" else 'MC') + "\n")
@@ -78,17 +86,18 @@ if args.advantage_flag:
 running_state = ZFilter((num_inputs, ), clip=5)
 start_time = dt.datetime.now()
 STEPS = 0
-for iteration in range(1, 1001):
+for iteration in range(1, args.nr_epochs):
     memory = Memory()
     num_steps = 0
     batch_reward = 0
     num_episodes = 0
+    batch_durations = []
     # Collecting sampled data through policy roll-out in the environment
     while num_steps < args.batch_size:
         state = env.reset()
         state = running_state(state)
         reward_sum = 0
-        for t in range(10000):  # Don't infinite loop while learning
+        for t in range(args.max_episode_steps):  # Don't infinite loop while learning
             # Simulates one episode, i.e., until the agent reaches the terminal state or has taken 10000 steps in the environment
             action_mean, action_log_std, action_std = policy_net(
                 Variable(torch.Tensor([state])).to(args.device))
@@ -108,15 +117,32 @@ for iteration in range(1, 1001):
         num_episodes += 1
         batch_reward += reward_sum
 
+    mean_steps = num_steps / num_episodes
     mean_episode_reward = batch_reward / num_episodes
     batch = memory.sample()
     # Policy & Value Function Optimization
-    update_params(args, batch, policy_net, value_net, policy_optimizer,
+    step_size = update_params(args, batch, policy_net, value_net, policy_optimizer,
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer)
     STEPS += 1
 
     print('Iteration {:4d} - Average reward {:.3f} - Time elapsed: {:3d}sec'.
           format(iteration, mean_episode_reward,
                  (dt.datetime.now() - start_time).seconds))
+
+    results_writer.add(results=ResultsRow(
+        # All `run_` properties remain the same across savings of a run
+        run_label=args.run_label,
+        run_nr_epochs=args.nr_epochs,
+        run_model=args.pg_algorithm,
+        
+        perf=mean_episode_reward,
+        timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
+        hardware=platform.node(),
+        epoch_duration=(dt.datetime.now() - start_time).seconds,
+        epoch=iteration,
+        step_size=step_size if args.pg_algorithm is 'TRPO' else args.lr ,
+        nr_steps=mean_steps,
+        nr_episodes=num_episodes,
+    ))
+
     start_time = dt.datetime.now()
-    summa_writer.add_scalar("Average reward", mean_episode_reward, STEPS)
