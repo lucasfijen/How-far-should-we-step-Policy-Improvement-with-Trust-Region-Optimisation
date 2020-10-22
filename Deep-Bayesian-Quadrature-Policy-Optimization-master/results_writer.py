@@ -1,4 +1,6 @@
+from genericpath import exists
 import utils
+import os
 import csv
 import pandas as pd
 from tensorboardX import SummaryWriter
@@ -48,6 +50,11 @@ class ResultsWriter:
         ]
 
         self.results = pd.DataFrame(columns=self.columns)
+
+        if (not os.path.exists(f'{path_to_results}/results.csv') or os.path.getsize(f'{path_to_results}/results.csv') == 0):
+            with open(f'{self.path}/results.csv','w') as f:
+                writer = csv.writer(f)
+                writer.writerow(self.columns)
 
     def add(self, results: ResultsRow):
         self.results = self.results.append(results._asdict(), ignore_index=True)
