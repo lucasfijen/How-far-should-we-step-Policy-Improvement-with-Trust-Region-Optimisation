@@ -90,8 +90,8 @@ STEPS = 0
 
 episodetqdm = trange(1, args.nr_epochs+1, desc='iteration', unit=' iteration',position=0)
 scoretqdm = tqdm(total=0, desc='reward', unit=' reward', position=1, leave=False)
-episodetqdm.refresh()
-scoretqdm.refresh()
+episodetqdm.clear()
+scoretqdm.clear()
 for iteration in episodetqdm:
     memory = Memory()
     num_steps = 0
@@ -131,7 +131,8 @@ for iteration in episodetqdm:
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer)
     STEPS += 1
 
-    roundreward = float('{:.3f}'.format(mean_episode_reward))
+    # UPDATE OF PROGRESS BAR, IF NEGATIVE, I GIVE 0
+    roundreward = max(0, float('{:.3f}'.format(mean_episode_reward)))
     if roundreward > scoretqdm.total:
         scoretqdm.total = roundreward
     scoretqdm.update(roundreward - scoretqdm.n)
