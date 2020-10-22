@@ -64,6 +64,8 @@ def update_policy(args,
     grads = torch.autograd.grad(get_loss(), policy_net.parameters())
     loss_grad = torch.cat([grad.view(-1) for grad in grads]).data
 
+    step_size = None
+
     def Fvp(v):
         # Computes Fisher vector product as a Hessian vector product of KL divergence (same as the trick used in TRPO)
         kl = get_kl()
@@ -124,8 +126,13 @@ def update_policy(args,
             print("step size?: ", torch.dist(old_params, new_params))
         else:  # TRPO update
             stepdir = -neg_stepdir  # Search direction after solving the constrained optimization problem, same as natural gradient
-            shs = 0.5 * (stepdir * Fvp(stepdir)).sum(0, keepdim=True)
-            lm = torch.sqrt(shs / args.max_kl)  # One over largest step size
+            shs = 0.5 * (stepdir * Fvp(stepdir)).sum(0, keepdim=True) ## Important, here is the TRPO magic
+            lm = torch.sqrt(shs / args.max_kl)  # One over largest step size/ trust region size
+            beta = torch.sqrt(args.max_kl/shs)
+            print(1/lm)
+
+            step_size = 1 / lm
+            print(beta)
             fullstep = stepdir / lm[
                 0]  # Naive trust region based update corresponding to the largest step size
             neggdotstepdir = (stepdir * Fvp(stepdir)).sum(0, keepdim=True)
@@ -134,6 +141,8 @@ def update_policy(args,
             success, new_params = linesearch(policy_net, get_loss, prev_params,
                                              fullstep, neggdotstepdir / lm[0])
             set_flat_params_to(policy_net, new_params)
+
+    return step_size        
 
 
 def update_params(args, batch, policy_net, value_net, policy_optimizer,
@@ -256,5 +265,7 @@ def update_params(args, batch, policy_net, value_net, policy_optimizer,
             2.0 * std1.pow(2)) - 0.5
         return kl.sum(1, keepdim=True)
 
-    update_policy(args, get_loss, get_kl, policy_net, policy_optimizer,
+    step_size = update_policy(args, get_loss, get_kl, policy_net, policy_optimizer,
                   value_net, likelihood)
+
+    return step_size

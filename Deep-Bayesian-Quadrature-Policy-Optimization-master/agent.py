@@ -119,7 +119,7 @@ for iteration in range(1, args.nr_epochs):
     mean_episode_reward = batch_reward / num_episodes
     batch = memory.sample()
     # Policy & Value Function Optimization
-    update_params(args, batch, policy_net, value_net, policy_optimizer,
+    step_size = update_params(args, batch, policy_net, value_net, policy_optimizer,
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer)
     STEPS += 1
 
@@ -127,19 +127,21 @@ for iteration in range(1, args.nr_epochs):
           format(iteration, mean_episode_reward,
                  (dt.datetime.now() - start_time).seconds))
 
+    # All `run_` properties remain the same across savings of a run
     results_writer.add(results=ResultsRow(
         run_label=args.run_label,
         run_nr_epochs=args.nr_epochs,
-        iteration=iteration,
-        nr_steps=num_steps,
         run_model=args.pg_algorithm,
+        
         perf=mean_episode_reward,
-        velocity=0,
         timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
+        hardware=platform.node(),
+        epoch_duration=(dt.datetime.now() - start_time).seconds,
+        epoch=iteration,
+
+        step_size=step_size if args.pg_algorithm is 'TRPO' else args.lr ,
+        nr_steps=num_steps,
         run_nr_rollouts=num_episodes,
-        step_size=0,
-        iteration_duration=(dt.datetime.now() - start_time).seconds,
-        hardware=platform.node()
     ))
 
     start_time = dt.datetime.now()

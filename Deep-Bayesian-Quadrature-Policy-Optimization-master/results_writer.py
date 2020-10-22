@@ -13,11 +13,10 @@ class ResultsRow(NamedTuple):
     run_nr_rollouts: str
     run_model: str
     timestamp: str
-    iteration: int
+    epoch: int
     step_size: float
-    iteration_duration: float
+    epoch_duration: float
     nr_steps: int
-    velocity: float
     perf: float
     hardware: str 
 
@@ -39,8 +38,8 @@ class ResultsWriter:
             'run_nr_rollouts',
             'run_model', 
             'timestamp', 
-            'iteration',
-            'iteration_duration',
+            'epoch',
+            'epoch_duration',
             'step_size', 
             'nr_steps', 
             'velocity', 
