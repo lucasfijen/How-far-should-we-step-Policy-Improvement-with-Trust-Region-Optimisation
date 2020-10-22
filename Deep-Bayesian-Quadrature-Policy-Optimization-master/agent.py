@@ -136,7 +136,7 @@ for iteration in episodetqdm:
     roundreward = max(0, float('{:.3f}'.format(mean_episode_reward)))
     if roundreward > scoretqdm.total:
         scoretqdm.total = roundreward
-    scoretqdm.update(max(0, roundreward - scoretqdm.n))
+    scoretqdm.update(max(-scoretqdm.n, roundreward - scoretqdm.n))
     # print('Iteration {:4d} - Average reward {:.3f} - Time elapsed: {:3d}sec'.
     #       format(iteration, mean_episode_reward,
     #              (dt.datetime.now() - start_time).seconds))
