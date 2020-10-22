@@ -13,7 +13,7 @@ import datetime as dt
 from arguments import get_args
 import fast_svd
 from results_writer import ResultsRow, ResultsWriter
-from tqdm import tqdm
+from tqdm.auto import tqdm, trange
 
 args = get_args()
 
@@ -88,9 +88,10 @@ running_state = ZFilter((num_inputs, ), clip=5)
 start_time = dt.datetime.now()
 STEPS = 0
 
-episodetqdm = tqdm(range(1, args.nr_epochs+1), desc='iteration', unit=' iteration')
-scoretqdm = tqdm(total=0, desc='reward', unit=' reward')
-
+episodetqdm = trange(1, args.nr_epochs+1, desc='iteration', unit=' iteration',position=0)
+scoretqdm = tqdm(total=0, desc='reward', unit=' reward', position=1, leave=False)
+episodetqdm.refresh()
+scoretqdm.refresh()
 for iteration in episodetqdm:
     memory = Memory()
     num_steps = 0
