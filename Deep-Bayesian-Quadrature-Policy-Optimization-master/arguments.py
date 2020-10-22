@@ -12,7 +12,7 @@ def get_args():
     )
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
     # General arguments
-    parser.add_argument('--label',
+    parser.add_argument('--run-label',
                         default=f"run-{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}",
                         metavar='G',
                         help='Label of the experiment to run')
@@ -170,8 +170,8 @@ def get_args():
     final_directory = os.path.join(args.output_directory, args.env_name, args.pg_algorithm, pg_estimator_name,  write_filename)
     if not os.path.exists(final_directory):
         os.makedirs(final_directory)
-    summa_writer = SummaryWriter(logdir=final_directory,
-                                 comment=pg_estimator_name + "-PG")
+    # summa_writer = SummaryWriter(logdir=final_directory,
+    #                              comment=pg_estimator_name + "-PG")
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    return args, summa_writer
+    return args

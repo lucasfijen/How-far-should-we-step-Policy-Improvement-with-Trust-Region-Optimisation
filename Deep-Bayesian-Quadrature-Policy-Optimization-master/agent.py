@@ -14,7 +14,7 @@ from arguments import get_args
 import fast_svd
 from results_writer import ResultsRow, ResultsWriter
 
-args, summa_writer = get_args()
+args = get_args()
 
 torch.utils.backcompat.broadcast_warning.enabled = True
 torch.utils.backcompat.keepdim_warning.enabled = True
@@ -31,7 +31,8 @@ num_actions = env.action_space.shape[0]
 print(' State Dimensions :- ', num_inputs)
 print(' Action Dimensions :- ', num_actions)
 print(args.output_directory)
-# results_writer = ResultsWriter(f'{args.output_directory}', pg_model=args.pg_algorithm)
+
+results_writer = ResultsWriter(args.run_label,f'{args.output_directory}', pg_model=args.pg_algorithm)
 args.device = torch.device("cuda" if args.pg_estimator == "BQ" else "cpu")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,18 +126,20 @@ for iteration in range(1, args.nr_epochs):
     print('Iteration {:4d} - Average reward {:.3f} - Time elapsed: {:3d}sec'.
           format(iteration, mean_episode_reward,
                  (dt.datetime.now() - start_time).seconds))
-    start_time = dt.datetime.now()
 
-    # results_writer.add(results=ResultsRow(
-    #     run_label=args.run_label,
-    #     run_nr_epochs=args.nr_epochs,
-    #     iteration=iteration,
-    #     nr_steps=STEPS,
-    #     run_model=args.pg_algorithm,
-    #     perf=mean_episode_reward,
-    #     velocity=0,
-    #     timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
-    #     run_nr_rollouts=num_episodes,
-    #     step_size=0,
-    #     hardware=platform.node()
-    # ))
+    results_writer.add(results=ResultsRow(
+        run_label=args.run_label,
+        run_nr_epochs=args.nr_epochs,
+        iteration=iteration,
+        nr_steps=num_steps,
+        run_model=args.pg_algorithm,
+        perf=mean_episode_reward,
+        velocity=0,
+        timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
+        run_nr_rollouts=num_episodes,
+        step_size=0,
+        iteration_duration=(dt.datetime.now() - start_time).seconds,
+        hardware=platform.node()
+    ))
+
+    start_time = dt.datetime.now()
