@@ -159,8 +159,8 @@ for iteration in episodetqdm:
     ))
 
     # Render simulations and store them
-    if (iteration == 1 or iteration == 100 or iteration % 100 == 0 or iteration == 1000 == 0):
-        print(f'Performing simulation and saving rendering on iteration {iteration}')
+    if (iteration == 1 or iteration % 100 == 0):
+        # print(f'Performing simulation and saving rendering on iteration {iteration}')
         sim_frames = sim.sim_episode(env, policy_net, 100, results_writer)
 
         if (len(sim_frames) > 0):
