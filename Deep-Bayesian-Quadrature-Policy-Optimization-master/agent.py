@@ -1,6 +1,7 @@
 from datetime import date, datetime
 import platform
 import gym
+import sim
 import torch
 import gpytorch
 from models import *
@@ -150,9 +151,17 @@ for iteration in episodetqdm:
         seed=args.seed,
         epoch_duration=(dt.datetime.now() - start_time).seconds,
         epoch=iteration,
-        step_size=step_size.item if args.pg_algorithm == 'TRPO' else args.lr ,
+        step_size=step_size.item() if args.pg_algorithm == 'TRPO' else args.lr ,
         nr_steps=mean_steps,
         nr_episodes=num_episodes,
     ))
+
+    # Render simulations and store them
+    if (iteration == 0 or iteration == 100 or iteration == 1000 == 0):
+        print(f'Performing simulation on iteration {iteration}')
+        sim_frames = sim.sim_episode(env, policy_net, 100, results_writer)
+
+        if (len(sim_frames) > 0):
+            results_writer.save_render(sim_frames, iteration)
 
     start_time = dt.datetime.now()

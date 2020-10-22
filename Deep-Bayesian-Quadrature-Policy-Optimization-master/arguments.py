@@ -61,6 +61,12 @@ def get_args():
                         metavar='G',
                         help=
                         'Mention the target GPU for deployment. Our GP kernel learning does not support multi-gpu training.')
+    parser.add_argument('--save-render',
+                        default=False,
+                        type=bool,
+                        metavar='G',
+                        help=
+                        'If you wish to store render as result')
     parser.add_argument('--seed',
                         type=int,
                         default=-1,
