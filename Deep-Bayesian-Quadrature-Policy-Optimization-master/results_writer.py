@@ -10,6 +10,8 @@ class ResultsWriterOptions(NamedTuple):
     pg_model: str
 
 class ResultsRow(NamedTuple):
+    env: str
+    seed: int | float
     run_label: str
     run_nr_epochs: str
     nr_episodes: str
@@ -35,6 +37,8 @@ class ResultsWriter:
         )
 
         self.columns = [
+            'env',
+            'seed',
             'run_label',
             'run_nr_epochs',
             'nr_episodes',
@@ -42,7 +46,7 @@ class ResultsWriter:
             'timestamp', 
             'epoch',
             'epoch_duration',
-            'step_size', 
+            'step_size',
             'nr_steps', 
             'velocity', 
             'perf',

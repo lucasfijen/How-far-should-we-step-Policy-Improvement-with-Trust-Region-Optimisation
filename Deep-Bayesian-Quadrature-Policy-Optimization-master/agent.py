@@ -134,10 +134,11 @@ for iteration in range(1, args.nr_epochs):
         run_label=args.run_label,
         run_nr_epochs=args.nr_epochs,
         run_model=args.pg_algorithm,
-        
+        env=args.env_name,
         perf=mean_episode_reward,
         timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
         hardware=platform.node(),
+        seed=args.seed,
         epoch_duration=(dt.datetime.now() - start_time).seconds,
         epoch=iteration,
         step_size=step_size if args.pg_algorithm is 'TRPO' else args.lr ,
