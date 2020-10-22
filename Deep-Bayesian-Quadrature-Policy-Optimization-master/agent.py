@@ -141,7 +141,7 @@ for iteration in range(1, args.nr_epochs):
         seed=args.seed,
         epoch_duration=(dt.datetime.now() - start_time).seconds,
         epoch=iteration,
-        step_size=step_size if args.pg_algorithm is 'TRPO' else args.lr ,
+        step_size=step_size.item if args.pg_algorithm == 'TRPO' else args.lr ,
         nr_steps=mean_steps,
         nr_episodes=num_episodes,
     ))

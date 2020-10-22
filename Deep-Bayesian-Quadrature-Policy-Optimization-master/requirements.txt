@@ -1,4 +1,6 @@
 numpy
+pandas
+mujoco-py==v1.50.1.0
 torch>=1.1.0
 gpytorch==0.3.5
 tensorboardX==1.9
