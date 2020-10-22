@@ -14,7 +14,7 @@ import datetime as dt
 from arguments import get_args
 import fast_svd
 from results_writer import ResultsRow, ResultsWriter
-from tqdm import tqdm
+from tqdm.auto import tqdm, trange
 
 args = get_args()
 
@@ -89,9 +89,10 @@ running_state = ZFilter((num_inputs, ), clip=5)
 start_time = dt.datetime.now()
 STEPS = 0
 
-episodetqdm = tqdm(range(1, args.nr_epochs+1), desc='iteration', unit=' iteration')
-scoretqdm = tqdm(total=0, desc='reward', unit=' reward')
-
+episodetqdm = trange(1, args.nr_epochs+1, desc='iteration', unit=' iteration',position=0)
+scoretqdm = tqdm(total=0, desc='reward', unit=' reward', position=1, leave=False)
+episodetqdm.clear()
+scoretqdm.clear()
 for iteration in episodetqdm:
     memory = Memory()
     num_steps = 0
@@ -131,7 +132,8 @@ for iteration in episodetqdm:
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer)
     STEPS += 1
 
-    roundreward = float('{:.3f}'.format(mean_episode_reward))
+    # UPDATE OF PROGRESS BAR, IF NEGATIVE, I GIVE 0
+    roundreward = max(0, float('{:.3f}'.format(mean_episode_reward)))
     if roundreward > scoretqdm.total:
         scoretqdm.total = roundreward
     scoretqdm.update(roundreward - scoretqdm.n)
