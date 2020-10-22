@@ -79,4 +79,4 @@ class ResultsWriter:
     def save_render(self, renders_array, iteration):
         render_images = [Image.fromarray(i) for i in renders_array]
         imageio.mimsave(f'{self.path}/{self.run_label}/simulation-iter-{iteration}.gif', render_images, 'GIF')
-        print("Stored simulation")
+        # print("Stored simulation")
