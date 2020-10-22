@@ -17,7 +17,8 @@ class ResultsRow(NamedTuple):
     iteration_duration: float
     nr_steps: int
     velocity: float
-    perf: float    
+    perf: float
+    hardware: str 
 
 class ResultsWriter:
     def __init__(self, path_to_results: str, pg_model: str = '') -> None:
@@ -40,7 +41,8 @@ class ResultsWriter:
             'step_size', 
             'nr_steps', 
             'velocity', 
-            'perf'
+            'perf',
+            'hardware'
         ]
         self.results = pd.DataFrame(columns=self.columns)
 

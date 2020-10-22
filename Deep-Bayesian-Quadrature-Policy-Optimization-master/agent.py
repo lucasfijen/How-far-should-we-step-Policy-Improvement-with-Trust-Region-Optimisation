@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import platform
 import gym
 import torch
 import gpytorch
@@ -22,18 +23,20 @@ torch.manual_seed(args.seed)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Setting up the environment
-print('------------ Starting ' + args.env + ' Environment ------------')
-env = gym.make(args.env)
+print('------------ Starting ' + args.env_name + ' Environment ------------')
+env = gym.make(args.env_name)
 env.seed(args.seed)
 num_inputs = env.observation_space.shape[0]
 num_actions = env.action_space.shape[0]
 print(' State Dimensions :- ', num_inputs)
 print(' Action Dimensions :- ', num_actions)
-results_writer = ResultsWriter(f'{args.output_directory}', pg_model=args.pg_algorithm)
+print(args.output_directory)
+# results_writer = ResultsWriter(f'{args.output_directory}', pg_model=args.pg_algorithm)
+args.device = torch.device("cuda" if args.pg_estimator == "BQ" else "cpu")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Instantiating the policy and value function neural networks, GP's MLL objective function and their respective optimizers
-print('Going to run for the following PG algorithms :- ', args.pg_models)
+print('Going to run for the following PG algorithms :- ', args.pg_algorithm)
 print('Policy Gradient Estimator :- ' +
       (('UAPG' if args.UAPG_flag else 'DBQPG'
         ) if args.pg_estimator == "BQ" else 'MC') + "\n")
@@ -124,15 +127,16 @@ for iteration in range(1, args.nr_epochs):
                  (dt.datetime.now() - start_time).seconds))
     start_time = dt.datetime.now()
 
-    results_writer.add(results=ResultsRow(
-        run_label=args.run_label,
-        run_nr_epochs=args.nr_epochs,
-        iteration=iteration,
-        nr_steps=STEPS,
-        run_model=args.pg_algorithm,
-        perf=mean_episode_reward,
-        velocity=0,
-        timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
-        run_nr_rollouts=num_episodes,
-        step_size=0,
-    ))
+    # results_writer.add(results=ResultsRow(
+    #     run_label=args.run_label,
+    #     run_nr_epochs=args.nr_epochs,
+    #     iteration=iteration,
+    #     nr_steps=STEPS,
+    #     run_model=args.pg_algorithm,
+    #     perf=mean_episode_reward,
+    #     velocity=0,
+    #     timestamp=datetime.now().strftime('%m_%d_%Y_%H_%M_%S'),
+    #     run_nr_rollouts=num_episodes,
+    #     step_size=0,
+    #     hardware=platform.node()
+    # ))
