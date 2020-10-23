@@ -46,9 +46,9 @@ def get_args():
                         metavar='cuda',
                         help='Use cuda (if available) or not?')
     parser.add_argument('--pg_algorithm',
-                        default="VanillaPG",
+                        default="vanilla",
                         help=
-                        'TRPO | VanillaPG | NPG. Selecting the policy optimization technique')
+                        'TRPO | vanilla | NPG. Selecting the policy optimization technique')
     parser.add_argument('--render',
                         action='store_true',
                         help='renders the policy roll-out in the environment')
@@ -84,7 +84,7 @@ def get_args():
                         metavar='G',
                         help='GAE exponentially-weighted average coefficient (default: 0.97)')
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
-    # LR for VanillaPG and NPG
+    # LR for vanilla and NPG
     parser.add_argument('--lr',
                         type=float,
                         default=7e-4,

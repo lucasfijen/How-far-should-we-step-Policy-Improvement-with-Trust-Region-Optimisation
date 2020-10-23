@@ -80,7 +80,7 @@ def update_policy(args,
             [grad.contiguous().view(-1) for grad in grads]).data
         return flat_grad_grad_kl + v * args.damping  # damping ensures numerical stability and faster convergence
 
-    if args.pg_algorithm == "VanillaPG":  # Computes conventional policy gradient
+    if args.pg_algorithm == "vanilla":  # Computes conventional policy gradient
         if args.pg_estimator == 'BQ' and args.UAPG_flag:
             # Computes the low-rank SVD of the covariance matrix for vanilla PG, without constructing it in the first place.
             # Specifically, we utilize fast covariance vector products for fast low-rank SVD computation.
@@ -249,7 +249,7 @@ def update_params(args, batch, policy_net, value_net, policy_optimizer,
                        torch.exp(log_prob - Variable(fixed_log_prob))).mean()
         else:
             # The gradient of this expression is same as the previous, but the absence of exp makes it marginally faster to compute,
-            # besides it is to distinguish VanillaPG and NPG from TRPO
+            # besides it is to distinguish vanilla and NPG from TRPO
             pg_loss = (-action_value_proxy * log_prob).mean()
         return pg_loss
 

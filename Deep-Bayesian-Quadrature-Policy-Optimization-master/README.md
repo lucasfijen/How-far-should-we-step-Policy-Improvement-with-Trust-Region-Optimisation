@@ -65,16 +65,16 @@ Training
 
 Modular implementation:
 ```train
-python agent.py --env-name <gym_environment_name> --pg_algorithm <VanillaPG/NPG/TRPO> --pg_estimator <MC/BQ> --UAPG_flag
+python agent.py --env-name <gym_environment_name> --pg_algorithm <vanilla/NPG/TRPO> --pg_estimator <MC/BQ> --UAPG_flag
 ```
 All the experiments will run for 1000 policy updates and the **logs** get stored in ```session_logs/``` folder. To reproduce the results in the paper, refer the following command:
 ```train
 # Running Monte-Carlo baselines
-python agent.py --env-name <gym_environment_name> --pg_algorithm <VanillaPG/NPG/TRPO> --pg_estimator MC
+python agent.py --env-name <gym_environment_name> --pg_algorithm <vanilla/NPG/TRPO> --pg_estimator MC
 # DBQPG as the policy gradient estimator
-python agent.py --env-name <gym_environment_name> --pg_algorithm <VanillaPG/NPG/TRPO> --pg_estimator BQ
+python agent.py --env-name <gym_environment_name> --pg_algorithm <vanilla/NPG/TRPO> --pg_estimator BQ
 # UAPG as the policy gradient estimator
-python agent.py --env-name <gym_environment_name> --pg_algorithm <VanillaPG/NPG/TRPO> --pg_estimator BQ --UAPG_flag
+python agent.py --env-name <gym_environment_name> --pg_algorithm <vanilla/NPG/TRPO> --pg_estimator BQ --UAPG_flag
 ```
 For more customization options, kindly take a look at the ```arguments.py```.
 
@@ -88,7 +88,7 @@ Results
 
 ### Vanilla Policy Gradient
 
-![Average of 10 runs.](/imgs/VanillaPG_plot.png)
+![Average of 10 runs.](/imgs/vanilla_plot.png)
 
 ### Natural Policy Gradient
 
