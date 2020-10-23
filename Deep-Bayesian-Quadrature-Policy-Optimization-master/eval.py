@@ -1,3 +1,5 @@
+from matplotlib import use
+from matplotlib import lines
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,11 +18,13 @@ path_to_plots = 'temp_results/plots'
 path_to_total_results = 'temp_results/total.csv'
 merge_single_runs = True
 
-def get_graph_style(group, use_seed = False):
+def get_graph_style(group, use_seed = False, use_lr = False):
+    """Deriving appropriate colors based on dataframe and settings."""
     alpha = 1
     marker=None
+    linestyle='solid'
 
-    if not use_seed:
+    if not use_seed and not use_lr:
         if group.iloc[0]['run_model'] == 'NPG':
             # Blueish
             color = '#B83280'
@@ -33,6 +37,25 @@ def get_graph_style(group, use_seed = False):
             # Greenish
             color = '#68D391'
             linestyle = 'dashed'
+    elif ((not use_seed) and use_lr):
+        if group.iloc[0]['step_size'] == 0.1 and group.iloc[0]['run_model'] == 'NPG':
+            # Dark purple
+            color = '#553C9A'
+        elif group.iloc[0]['step_size'] == 0.01 and group.iloc[0]['run_model'] == 'NPG':
+            # Medium Indigo
+            color = '#667EEA'
+        elif group.iloc[0]['step_size'] == 0.001 and group.iloc[0]['run_model'] == 'NPG':
+            # Light blue
+            color = '#38B2AC'
+        elif group.iloc[0]['step_size'] == 0.1 and group.iloc[0]['run_model'] != 'NPG':
+            # Dark red
+            color = '#C53030'
+        elif group.iloc[0]['step_size'] == 0.01 and group.iloc[0]['run_model'] != 'NPG':
+            # Medium orange
+            color = '#F6AD55'
+        else:
+            # Light yellow
+            color = '#FEFCBF'
     else:
         if group.iloc[0]['seed'] == 42:
             color = '#6B46C1'
@@ -50,7 +73,7 @@ def get_graph_style(group, use_seed = False):
     return {'color': color, 'linestyle': linestyle, 'alpha': alpha, 'marker': marker}
 
 def merge_all_single_runs(filter_unfinished: bool = False):
-    """Merge all single-run csvs"""
+    """Merging all runs"""
     total_df = pd.DataFrame()
     results_path = Path(path_to_results)
     single_runs_in_subdirs_paths = list(results_path.rglob('run-*/*.csv'))
@@ -71,6 +94,8 @@ def merge_all_single_runs(filter_unfinished: bool = False):
     return total_df
 
 def plot_stepsize_per_env(all_runs_df, envs=[]):
+    """Plotting our stepsize per env"""
+
     # take in only one particular step-size, namely 0.001
     all_runs_df = all_runs_df[(
         (all_runs_df['run_model'] == 'TRPO')
@@ -108,6 +133,8 @@ def plot_stepsize_per_env(all_runs_df, envs=[]):
         plt.cla()
 
 def plot_perf_per_env(all_runs_df, envs=[]):
+    """Plotting our performance per env"""
+
     # take in only one particular step-size, namely 0.001
     all_runs_df = all_runs_df[(
         (all_runs_df['run_model'] == 'TRPO')
@@ -145,6 +172,7 @@ def plot_perf_per_env(all_runs_df, envs=[]):
         plt.cla()
 
 def plot_update_perf(all_runs_df, envs=[]):
+    """Plotting our update/performance tradeoff"""
     # take in only one particular step-size, namely 0.001
     all_runs_df = all_runs_df[(
         (all_runs_df['run_model'] == 'TRPO')
@@ -173,6 +201,46 @@ def plot_update_perf(all_runs_df, envs=[]):
         plt.savefig(f'{path_to_plots}/step_reward-{env_name}.png')
         plt.cla()
 
+def plot_hyperparameters(all_runs_df, envs=[]):
+    """Plotting our hyperparameters"""
+    # take in only one particular step-size, namely 0.001
+    all_runs_df = all_runs_df[(
+        (all_runs_df['run_model'] == 'NPG')
+        | (all_runs_df['run_model'] == 'vanilla')
+        | (all_runs_df['run_model'] == 'VanillaPG')
+    )]
+
+    for env_name in envs:
+        env_runs_df = all_runs_df[all_runs['env'] == env_name]
+        env_per_model = env_runs_df.groupby('run_model')
+
+        for name, group in env_per_model:
+            lrs = group.groupby('step_size')
+
+            for lr, lr_group in lrs:
+                graph_style = get_graph_style(lr_group , use_lr=True)
+                run_groups = lr_group.groupby('run_label')
+                # For each model, get all seeds, and sort by epoch
+                seqs = [run_group[['epoch', 'perf', 'seed']].set_index('epoch').sort_index() for _, run_group in run_groups]
+
+                # All seeds have the same X
+                x = np.array([seq.index.to_numpy() for seq in seqs])[0, :]
+
+                # Get mean and variance across seeds
+                seqs_numpy = np.array([seq['perf'].to_numpy() for seq in seqs])
+                seqs_std = seqs_numpy.std(0)
+                y = seqs_numpy.mean(0)
+
+                # Render plot
+                plt.plot(x, y, label=f"{name}, lr={lr}", **graph_style)
+                plt.fill_between(x[0: -1: 99], (y + seqs_std)[0: -1: 99], (y-seqs_std)[0: -1: 99], alpha=0.2, facecolor=graph_style['color'])
+                plt.xlabel('Iterations', fontsize = 15, weight = 'bold')
+                plt.ylabel('Reward', fontsize = 15, weight = 'bold')
+                plt.title(f'Showing reward over different step-sizes for model {name}')
+
+            plt.legend(loc='best')
+            plt.savefig(f'{path_to_plots}/hyperparam-{env_name}-{name}.png')
+            plt.cla()
 if __name__ == "__main__":
     # Prep right directories
     utils.ensure_path(path_to_total_results)
@@ -190,3 +258,4 @@ if __name__ == "__main__":
     plot_stepsize_per_env(all_runs, ['Swimmer-v2', 'Ant-v2', 'HalfCheetah-v2'])
     plot_perf_per_env(all_runs, ['Swimmer-v2', 'Ant-v2', 'HalfCheetah-v2'])
     plot_update_perf(all_runs, ['Swimmer-v2', 'Ant-v2', 'HalfCheetah-v2'])
+    plot_hyperparameters(all_runs, ['Swimmer-v2'])
