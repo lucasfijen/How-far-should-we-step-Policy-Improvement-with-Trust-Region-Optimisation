@@ -1,10 +1,15 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import utils
 from pathlib import Path
 import seaborn as sns
 
-plt.style.use('seaborn-dark')
+plt.style.use('seaborn-poster') #sets the size of the charts
+plt.style.use('ggplot')
+matplotlib.rcParams['font.family'] = "serif"
+sns.set_context('poster')
 
 path_to_results = 'temp_results'
 path_to_plots = 'temp_results/plots'
@@ -14,23 +19,18 @@ merge_single_runs = False
 def get_graph_style(group):
     alpha = 1
     if group.iloc[0]['run_model'] == 'NPG':
-        linestyle = 'solid'
-        alpha = 0.3
-    elif group.iloc[0]['run_model'] == 'TRPO':
-        linestyle = 'dashdot'
-    else:
-        linestyle = 'dashdot'
-    
-    if group.iloc[0]['seed'] == 42:
         # Blueish
-        color = '#7F9CF5'
-    elif group.iloc[0]['seed'] == 666:
+        color = '#B83280'
+        linestyle = 'solid'
+    elif group.iloc[0]['run_model'] == 'TRPO':
         # Redish
         color = '#FC8181'
-    else: # seed is 1337
+        linestyle = 'dashdot'
+    else:
         # Greenish
         color = '#68D391'
-
+        linestyle = 'dashdot'
+    
     return {'color': color, 'linestyle': linestyle, 'alpha': alpha}
 
 def merge_all_single_runs(filter_unfinished: bool = False):
@@ -54,22 +54,40 @@ def merge_all_single_runs(filter_unfinished: bool = False):
     return total_df
 
 def plot_stepsize_per_env(all_runs_df, envs=[]):
+    # take in only one particular step-size, namely 0.001
+    all_runs_df = all_runs_df[(
+        (all_runs_df['run_model'] == 'TRPO')
+        | (all_runs_df['step_size'] == 0.001)
+    )]
+
     for env_name in envs:
         env_runs_df = all_runs_df[all_runs['env'] == env_name]
-        env_runs_per_run_df = env_runs_df.groupby('run_label')
+        env_per_model = env_runs_df.groupby('run_model')
 
-        for name, group in env_runs_per_run_df:
+        for name, group in env_per_model:
             graph_style = get_graph_style(group)
 
-            plt.plot(group['epoch'][0:-1:99], group['step_size'][0:-1:99], label=name, **graph_style)
+            # For each model, get all seeds, and sort by epoch
+            runs_in_env = group.groupby('run_label')
+            seqs = [run_group[['epoch', 'step_size', 'seed']].set_index('epoch').sort_index() for name, run_group in runs_in_env]
+
+            # All seeds have the same X
+            x = np.array([seq.index.to_numpy() for seq in seqs])[0, :]
+
+            # Get mean and variance across seeds
+            seqs_numpy = np.array([seq['step_size'].to_numpy() for seq in seqs])
+            seqs_std = seqs_numpy.std(0)
+            y = seqs_numpy.mean(0)
+
+            # Render plot
+            plt.title(f'Showing step-size over iterations for {env_name}')
+            plt.plot(x, y, label=name, **graph_style)
+            plt.fill_between(x[0: -1: 99], (y + seqs_std)[0: -1: 99], (y-seqs_std)[0: -1: 99], alpha=0.5, facecolor=graph_style['color'])
+            plt.xlabel('Iterations', fontsize = 15, weight = 'bold')
+            plt.ylabel('Step-size', fontsize = 15, weight = 'bold')
 
         plt.legend(loc='best')
         plt.savefig(f'{path_to_plots}/step_size-{env_name}.png')
-        print('done')
-        
-        # sns_plot = sns.lineplot(data=env_runs_df, x='epoch', y='step_size', style='run_label')
-        # sns_plot.savefig(f'{path_to_plots}/step_size-{env_name}.png')
-        
 
 if __name__ == "__main__":
     # Prep right directories
