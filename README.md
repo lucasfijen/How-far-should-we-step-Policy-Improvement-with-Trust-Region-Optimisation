@@ -19,5 +19,8 @@ conda activate rl_final_report
 pip install -r requirements.txt
 ```
 
+Assuming you are in `src/`, you can then run the environment using `python agent.py`. For information regarding the various arguments, see `arguments.py`, and also
+the code repository [Deep Bayesian Quadrature Policy Optimization](https://github.com/Akella17/Deep-Bayesian-Quadrature-Policy-Optimization) for additional information.
+
 ## Credits
 Our codebase is heavily based on Akella17's implementation of TRPO and NPG, from their code repository [Deep Bayesian Quadrature Policy Optimization](https://github.com/Akella17/Deep-Bayesian-Quadrature-Policy-Optimization),
