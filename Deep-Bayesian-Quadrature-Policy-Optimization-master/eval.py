@@ -11,6 +11,28 @@ path_to_plots = 'temp_results/plots'
 path_to_total_results = 'temp_results/total.csv'
 merge_single_runs = False
 
+def get_graph_style(group):
+    alpha = 1
+    if group.iloc[0]['run_model'] == 'NPG':
+        linestyle = 'solid'
+        alpha = 0.3
+    elif group.iloc[0]['run_model'] == 'TRPO':
+        linestyle = 'dashdot'
+    else:
+        linestyle = 'dashdot'
+    
+    if group.iloc[0]['seed'] == 42:
+        # Blueish
+        color = '#7F9CF5'
+    elif group.iloc[0]['seed'] == 666:
+        # Redish
+        color = '#FC8181'
+    else: # seed is 1337
+        # Greenish
+        color = '#68D391'
+
+    return {'color': color, 'linestyle': linestyle, 'alpha': alpha}
+
 def merge_all_single_runs(filter_unfinished: bool = False):
     """Merge all single-run csvs"""
     total_df = pd.DataFrame()
@@ -37,30 +59,9 @@ def plot_stepsize_per_env(all_runs_df, envs=[]):
         env_runs_per_run_df = env_runs_df.groupby('run_label')
 
         for name, group in env_runs_per_run_df:
-            color = 'blue'
-            linestyle = '- - -'
-            alpha = 1
+            graph_style = get_graph_style(group)
 
-            if group.iloc[0]['run_model'] == 'NPG':
-                linestyle = 'solid'
-                alpha = 0.3
-            elif group.iloc[0]['run_model'] == 'TRPO':
-                linestyle = 'dashdot'
-            else:
-                linestyle = 'dashdot'
-            
-            if group.iloc[0]['seed'] == 42:
-                # Blueish
-                color = '#7F9CF5'
-            elif group.iloc[0]['seed'] == 666:
-                # Redish
-                color = '#FC8181'
-            else: # seed is 1337
-                # Greenish
-                color = '#68D391'
-
-            linestyle = '--' if group.iloc[0]['run_model'] == 'NPG' else '-'
-            plt.plot(group['epoch'], group['step_size'], linestyle=linestyle, color=color, alpha=alpha, label=name)
+            plt.plot(group['epoch'][0:-1:99], group['step_size'][0:-1:99], label=name, **graph_style)
 
         plt.legend(loc='best')
         plt.savefig(f'{path_to_plots}/step_size-{env_name}.png')
