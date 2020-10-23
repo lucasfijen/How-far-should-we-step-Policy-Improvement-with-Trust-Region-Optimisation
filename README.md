@@ -1,4 +1,4 @@
-# Policy Improvement with Trust Region Optimisation
+# How far should we step? Policy Improvement with Trust Region Optimisation
 Students: Lucas Fijen, Pieter de Marez Oyens, Jonathan Mitnik, Guido Visser.
 
 ---------
