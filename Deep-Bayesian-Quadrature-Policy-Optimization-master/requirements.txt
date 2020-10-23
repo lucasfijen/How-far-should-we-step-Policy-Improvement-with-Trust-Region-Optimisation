@@ -2,6 +2,8 @@ numpy
 pandas
 imageio
 pillow
+seaborn
+matplotlib
 mujoco-py==v1.50.1.0
 tqdm
 torch>=1.1.0
