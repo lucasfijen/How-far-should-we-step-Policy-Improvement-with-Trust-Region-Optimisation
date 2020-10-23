@@ -63,6 +63,7 @@ class ResultsWriter:
                 writer.writerow(self.columns)
 
     def add(self, results: ResultsRow):
+        """Store results in a CSV"""
         self.results = self.results.append(results._asdict(), ignore_index=True)
         
         # Write to shared csv
@@ -77,6 +78,6 @@ class ResultsWriter:
         self.tensorboard_writer.add_scalar("Average reward", results.perf, results.step_size)
     
     def save_render(self, renders_array, iteration):
+        """Save GIF of an array of np arrays representing images"""
         render_images = [Image.fromarray(i) for i in renders_array]
         imageio.mimsave(f'{self.path}/{self.run_label}/simulation-iter-{iteration}.gif', render_images, 'GIF')
-        # print("Stored simulation")

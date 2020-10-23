@@ -3,6 +3,7 @@ from torch.autograd import Variable
 from running_state import ZFilter
 
 def sim_episode(env, policy, max_episode_steps, result_writer):
+    """Simulate an episode and store the resulting render."""
     try:
         running_state = ZFilter((env.observation_space.shape[0], ), clip=5)
 

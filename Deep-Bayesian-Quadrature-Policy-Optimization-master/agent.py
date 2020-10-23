@@ -51,6 +51,7 @@ policy_optimizer = torch.optim.Adam(
     weight_decay=1e-3) if args.pg_algorithm != "TRPO" else None
 
 value_net, gp_mll, likelihood, gp_value_optimizer, nn_value_optimizer = None, None, None, None, None
+
 if args.pg_estimator == "BQ":
     # Instantiating the value network with both GP and value heads for approximating Q(s,a) and V(s)
     likelihood = gpytorch.likelihoods.GaussianLikelihood(
@@ -85,27 +86,33 @@ if args.advantage_flag:
                                           weight_decay=1e-3)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Policy Optimization
+
+# Prepare training loop
 running_state = ZFilter((num_inputs, ), clip=5)
 start_time = dt.datetime.now()
 STEPS = 0
-
 episodetqdm = trange(1, args.nr_epochs+1, desc='iteration', unit=' iteration',position=0)
 scoretqdm = tqdm(total=0, desc='reward', unit=' reward', position=1, leave=False)
 episodetqdm.clear()
 scoretqdm.clear()
+
+# Start training
 for iteration in episodetqdm:
     memory = Memory()
     num_steps = 0
     batch_reward = 0
     num_episodes = 0
     batch_durations = []
+
     # Collecting sampled data through policy roll-out in the environment
     while num_steps < args.batch_size:
         state = env.reset()
         state = running_state(state)
         reward_sum = 0
-        for t in range(args.max_episode_steps):  # Don't infinite loop while learning
-            # Simulates one episode, i.e., until the agent reaches the terminal state or has taken 10000 steps in the environment
+
+        # Don't infinite loop while learning
+        # Simulates one episode, i.e., until the agent reaches the terminal state or has taken 10000 steps in the environment
+        for t in range(args.max_episode_steps):
             action_mean, action_log_std, action_std = policy_net(
                 Variable(torch.Tensor([state])).to(args.device))
             action = torch.normal(action_mean,
@@ -127,19 +134,16 @@ for iteration in episodetqdm:
     mean_steps = num_steps / num_episodes
     mean_episode_reward = batch_reward / num_episodes
     batch = memory.sample()
+
     # Policy & Value Function Optimization
     step_size = update_params(args, batch, policy_net, value_net, policy_optimizer,
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer)
     STEPS += 1
 
-    # UPDATE OF PROGRESS BAR, IF NEGATIVE, I GIVE 0
     roundreward = max(0, float('{:.3f}'.format(mean_episode_reward)))
     if roundreward > scoretqdm.total:
         scoretqdm.total = roundreward
     scoretqdm.update(max(-scoretqdm.n, roundreward - scoretqdm.n))
-    # print('Iteration {:4d} - Average reward {:.3f} - Time elapsed: {:3d}sec'.
-    #       format(iteration, mean_episode_reward,
-    #              (dt.datetime.now() - start_time).seconds))
 
     results_writer.add(results=ResultsRow(
         # All `run_` properties remain the same across savings of a run
@@ -160,7 +164,6 @@ for iteration in episodetqdm:
 
     # Render simulations and store them
     if (iteration == 1 or iteration % 100 == 0):
-        # print(f'Performing simulation and saving rendering on iteration {iteration}')
         sim_frames = sim.sim_episode(env, policy_net, 100, results_writer)
 
         if (len(sim_frames) > 0):

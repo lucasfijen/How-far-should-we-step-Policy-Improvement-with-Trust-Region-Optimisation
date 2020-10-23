@@ -60,6 +60,8 @@ def update_policy(args,
                   policy_optimizer=None,
                   value_net=None,
                   likelihood=None):
+    """Updates parameters of policy network according to optimization scheme."""
+
     # This method is used for updating the policy parameters based on the selected policy gradient setting.
     grads = torch.autograd.grad(get_loss(), policy_net.parameters())
     loss_grad = torch.cat([grad.view(-1) for grad in grads]).data
@@ -145,8 +147,7 @@ def update_policy(args,
 
 def update_params(args, batch, policy_net, value_net, policy_optimizer,
                   likelihood, gp_mll, gp_value_optimizer, nn_value_optimizer):
-    # states: batch-size x state-space
-    # states: batch-size x 
+    """Decide updating scheme based"""
     states = Variable(torch.Tensor(batch.state)).to(args.device)
     actions = torch.Tensor(np.concatenate(batch.action, 0)).to(args.device)
     action_means, action_log_stds, action_stds = policy_net(states)
